@@ -66,18 +66,36 @@ class BooksResource(Resource):
 
 
 class BookResource(Resource):
-    def get(self):
-        # TODO homework
-        pass
+    def get(self, id):
+        book = BookModel.query.get(id)
+        if book is None:
+            return {"message": "Book not found"}, 404
+        return book.as_dict()
 
-    def put(self):
-        # TODO homework
-        pass
+    def put(self, id):
+        book = BookModel.query.get(id)
+        if book is None:
+            return {"message": "Book not found"}, 404
 
-    def delete(self):
-        # TODO homework
-        pass
+        data = request.get_json()
+        if "title" in data:
+            book.title = data["title"]
+        if "author" in data:
+            book.author = data["author"]
 
+        db.session.commit()
+        return book.as_dict(), 200
 
-api.add_resource(BooksResource, "/books")
+    def delete(self, id):
+        book = BookModel.query.get(id)
+        if book is None:
+            return {"message": "Book not found"}, 404
+
+        db.session.delete(book)
+        db.session.commit()
+        return {"message": "Book deleted"}, 200
+
 # TODO Homework - add the Bookresource to respective binding url
+api.add_resource(BooksResource, "/books")
+api.add_resource(BookResource, "/books/<int:id>")
+
